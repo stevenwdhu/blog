@@ -1,0 +1,28 @@
+{% extends "base.html" %} {% load static %}
+{% block title %} Edit Article {% endblock title %}
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <br>
+                <form method="post" enctype="multipart/form-data"
+                      action="{% url 'article:article-update' article.pk %}">
+                    {% csrf_token %}
+                    {% for field in form %}
+                        <div class="form-group">
+                            {{ field.label_tag }}
+                            {% if field.name == 'image' and object.image %}
+                                <div class="container">
+                                    <img src="{{ object.image.url }}" alt="title image">
+                                </div>
+                            {% endif %}
+                            {{ field }}
+                            <div class="text-danger">{{ field.errors }}</div>
+                        </div>
+                    {% endfor %}
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

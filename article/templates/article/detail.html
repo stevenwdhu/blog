@@ -1,0 +1,340 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load mptt_tags %}
+
+{% block title %}
+    {{ article.title }} - Article Detail
+{% endblock title %}
+
+{% block style %}
+    <script src="{% static 'ckeditor/ckeditor/plugins/prism/lib/prism/prism_patched.min.js' %}"></script>
+    <script src="{% static 'prism/prism.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'prism/prism.css' %}">
+    <style type="text/css">
+        {# beautify markdown code block #}
+        .codehilite {
+            padding: 18px 6px 1px 10px;
+            border-radius: 10px
+        }
+
+        .sidebar {
+            will-change: min-height;
+        }
+
+        .sidebar__inner {
+            transform: translate(0, 0);
+            transform: translate3d(0, 0, 0);
+            will-change: position, transform;
+        }
+    </style>
+{% endblock style %}
+
+{% block content %}
+    <main class="container">
+
+        <h1 class="mt-4 mb-4">{{ article.title }}</h1>
+        <div class="alert alert-success">
+            <div class="d-flex">
+                <span class="mr-2">Author: {{ article.author }}</span>
+                {% if user == article.author %}
+                    &nbsp;&nbsp;
+                    <a href="{% url "article:article-update" article.pk %}" class="ml-auto">Edit</a>
+                    <span class="text-dark">&nbsp; | &nbsp;</span>
+                    <a href="#" class="text-danger" data-toggle="modal"
+                       data-target="#confirm-article-delete">DELETE</a>
+                {% endif %}
+            </div>
+            <div>
+                Views: {{ article.views }}
+            </div>
+        </div>
+        <div class="row">
+
+            {# TOC in screen < md #}
+            <div class="d-md-none">
+                <p>{{ toc|safe }}</p>
+            </div>
+
+            {# article body #}
+            <div class="col-md-9">
+                <p>{{ article.body|safe }}</p>
+
+                {# like button #}
+                <div><br><br></div>
+                <div class="text-center">
+                    <button class="btn btn-outline-danger col-md-3 hvr-icon-pulse-shrink"
+                            style="box-shadow: none"
+                            type="button"
+                            tabindex="-1"
+                            onclick="validate_liked(
+                                    '{% url 'article:article-like' article.id %}',
+                                    {{ article.id }},
+                                    {{ article.likes }}
+                                    )">
+                        Like&nbsp;&nbsp;<i class="fas fa-heart hvr-icon" style="color: #bfbfbf"
+                                           id="like_icon"></i>&nbsp;
+                        &nbsp;
+                        <span id="likes_number">{{ article.likes }}</span>
+                    </button>
+                </div>
+
+                {# comment input #}
+                <div><br><br></div>
+                <hr>
+                {% if user.is_authenticated %}
+                    <div>
+                        <form
+                                action="{% url 'comment:post_comment' article.pk %}"
+                                method="POST"
+                        >
+                            {% csrf_token %}
+                            <div class="form-group mt-2">
+                                <label for="body" class="h3">
+                                    <strong>
+                                        Comment
+                                    </strong>
+                                </label>
+                                <div>
+                                    {{ form.media }}
+                                    {{ form.content }}
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary ">Send</button>
+                        </form>
+                    </div>
+                    <br>
+                {% else %}
+                    <br>
+                    <h5 class="row justify-content-center">
+                        <a href="{% url 'userprofile:login' %}">Log in</a>&nbsp;before comment
+                    </h5>
+                    <br>
+                {% endif %}
+
+                {# comments list #}
+                <h4>{{ comments.count }} comments below: </h4>
+                <div class="row">
+                    {% recursetree comments %}
+                        {% with comment=node %}
+                            <div id="comment_{{ comment.id }}"
+                                 class="{% if comment.reply_to %}
+                                offset-1 col-11
+                                {% else %}
+                                col-12
+                                {% endif %}"
+                            >
+                                <hr>
+                                <p>
+                                    <strong style="color: pink">
+                                        {{ comment.user }}
+                                    </strong>
+
+                                    {% if comment.reply_to %}
+                                        <i class="far fa-arrow-alt-circle-right"
+                                           style="color: cornflowerblue;"
+                                        ></i>
+                                        <strong style="color: pink">
+                                            {{ comment.reply_to }}
+                                        </strong>
+                                    {% endif %}
+
+                                </p>
+                                {% if comment.delete_status %}
+                                    <p class="alert alert-danger text-center">
+                                        This comment was deleted.
+                                    </p>
+                                {% else %}
+                                    <div>{{ comment.content|safe }}</div>
+                                {% endif %}
+
+                                <div class="d-flex justify-content-between">
+                                    <p class="text-secondary align-self-center mb-0">
+                                        <i class="far fa-clock"></i>&nbsp;
+                                        {{ comment.create_time|timesince }}&nbsp;&nbsp;ago
+                                    </p>
+
+                                    <!-- 加载 modal 的按钮 -->
+                                    {% if user.is_authenticated %}
+                                        <button type="button"
+                                                class="btn btn-light btn-sm text-muted"
+                                                onclick="load_modal({{ article.pk }}, {{ comment.pk }})"
+                                        >
+                                            Reply
+                                        </button>
+                                    {% else %}
+                                        <a class="btn btn-light btn-sm text-muted"
+                                           href="{% url 'userprofile:login' %}"
+                                        >
+                                            Reply
+                                        </a>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Modal -->
+                                <div class="modal fade"
+                                     id="comment_reply_{{ comment.pk }}"
+                                     tabindex="-1"
+                                     role="dialog"
+                                     aria-labelledby="CommentModalCenter"
+                                     aria-hidden="true"
+                                >
+                                    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                                        <div class="modal-content" style="height: 510px">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="exampleModalCenterTitle">
+                                                    Reply to {{ comment.user }}</h5>
+                                            </div>
+                                            <div class="modal-body" id="modal_body_{{ comment.id }}"></div>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                                {% if not comment.is_leaf_node %}
+                                    <div class="children">
+                                        {{ children }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+
+                        {% endwith %}
+                    {% endrecursetree %}
+                </div>
+            </div>
+
+            {# TOC in screen >= md #}
+            <div class="sidebar" id="sidebar">
+                <div class="sidebar__inner">
+                    <div class="col-md-3 d-md-block collapse mt-4">
+                        <h4 class="mb-2"><strong>TOC</strong></h4>
+                        <hr>
+                        {{ toc|safe }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="confirm-article-delete" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Confirm delete</h5>
+                        <button class="close" data-dismiss="modal" style="outline: none">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <p>confirm to delete this article?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                        <button class="btn btn-danger" onclick="article_delete()">DELETE</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <form
+            style="display:none;"
+            id="safe_delete"
+            action="{% url 'article:article-delete' article.pk %}"
+            method="POST"
+    >
+        {% csrf_token %}
+        <button type="submit">DELETE</button>
+    </form>
+
+{% endblock %}
+
+{% block script %}
+    <script>
+        function article_delete() {
+            $('form#safe_delete button').click();
+        }
+
+        // make ckeditor full width
+        $(".django-ckeditor-widget").removeAttr('style');
+
+        // setting for sticky sidebar
+        $('#sidebar').stickySidebar({
+            topSpacing: 20,
+            bottomSpacing: 20,
+        });
+
+        // show correct color of the like button
+        function like_btn_red() {
+            $('#like_icon').css('color', '#ff6c5e');
+        }
+        if (JSON.parse(window.localStorage.getItem('article_liked') || '{}')[{{ article.id }}]) {
+            like_btn_red()
+        }
+    </script>
+
+    <script>
+        function load_modal(article_id, comment_id) {
+            let modal_body = '#modal_body_' + comment_id;
+            modal_id = '#comment_reply_' + comment_id;
+
+            if ($(modal_body).children().length === 0) {
+                let content = `<iframe src="/comment/${article_id}/post-comment/${comment_id}"
+frameborder="0" style="width: 100%; height: 100%;" id="iframe_${comment_id}"></iframe>`;
+                $(modal_body).append(content);
+            }
+
+
+            $(modal_id).modal('show');
+        }
+
+        function post_reply_and_jump_to(id) {
+            let redirect_url = "{% url 'article:article-detail' article.id %}";
+            window.location.replace(`${redirect_url}#comment_${id}`);
+            window.location.reload();
+        }
+    </script>
+    <script>
+        function validate_liked(url, article_id, likes) {
+            let liked;
+            const storage = window.localStorage;
+            const article_liked = JSON.parse(storage.getItem('article_liked') || '{}');
+            try {
+                liked = (article_id in article_liked && article_liked[article_id]);
+            } catch (err) {
+                storage.clear();
+                liked = false;
+            }
+            if (liked) {
+                layer.msg('You have already liked', {time: 2000});
+                return;
+            }
+            like_btn_red()
+            $('span#likes_number').text(likes + 1);
+
+            $.post(
+                url,
+                {csrfmiddlewaretoken: '{{ csrf_token }}'},
+                function (data) {
+                    if (data === 'success') {
+                        try {
+                            article_liked[article_id] = true;
+                        } catch (err) {
+                            storage.clear();
+                        }
+                        const article_liked_str = JSON.stringify(article_liked);
+                        try {
+                            storage.setItem("article_liked", article_liked_str);
+                        } catch (err) {
+                            // code 22 means LocalStorage is full
+                            if (err.code === 22) {
+                                storage.clear();
+                                storage.setItem("article_liked", article_liked_str);
+                            }
+                        }
+                    } else {
+                        layer.msg("Fail to connect to server.\nPlease try again later.");
+                    }
+
+                },
+            );
+        }
+    </script>
+{% endblock script %}

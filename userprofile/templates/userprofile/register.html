@@ -1,0 +1,29 @@
+{% extends "base.html" %} {% load static %}
+{% block title %} New account {% endblock title %}
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <br>
+                <form method="post" action="{% url 'userprofile:register' %}">
+                    {% csrf_token %}
+                    {% for field in form %}
+                        <div class="form-row col-lg-10 mt-2 mx-sm-1">
+                            {{ field.label_tag }}
+                        </div>
+                        <div class="form-row col-lg-10 col-lg-8 my-2">
+                            <div class="col-lg-5 w-100 mb-2 align-self-center">
+                                {{ field }}
+                            </div>
+                            <div class="text-danger text-nowrap mx-lg-3 mx-1 col mb-3 mb-lg-2 align-self-center">{{ field.errors }}</div>
+
+                        </div>
+                    {% endfor %}
+                    <div class="form-group col-md-4">
+                        <button type="submit" class="btn btn-primary mt-2">Submit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,53 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="{% static 'bootstrap-4.1.3/css/bootstrap.min.css' %}">
+</head>
+
+<body class="d-flex flex-column">
+    <form
+            action="."
+            method="POST"
+            id="reply_form"
+    >
+        {% csrf_token %}
+        <div class="form-group">
+            <div id="test">
+                {{ comment_form.media }}
+                {{ comment_form.content }}
+            </div>
+        </div>
+    </form>
+    <!-- 提交按钮 -->
+    <button onclick="confirm_submit({{ article_id }}, {{ parent_id }})" class="btn btn-primary
+    ml-auto">Send
+    </button>
+
+    <script src="{% static 'jquery-3.4.1.js' %}"></script>
+    <script src="{% static 'bootstrap-4.1.3/js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'bootstrap-4.1.3/js/bootstrap.bundle.min.js' %}"></script>
+
+    <script>
+        $(function () {
+            $(".django-ckeditor-widget").removeAttr('style');
+        });
+
+        function confirm_submit(article_id, comment_id) {
+            let content = CKEDITOR.instances['id_content'].getData();
+            $.post(
+                `/comment/${article_id}/post-comment/${comment_id}`,
+                {content: content},
+                function (data) {
+                    if (data.status === 'success') {
+                        parent.post_reply_and_jump_to(res.new_comment_id);
+                    }
+                },
+            );
+        }
+    </script>
+
+</body>
+</html>
