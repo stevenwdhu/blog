@@ -91,12 +91,12 @@ WSGI_APPLICATION = 'blog.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',  # 或者使用 mysql.connector.django
-        'NAME': 'windy$dbname',
-        'USER': 'windy',
-        'PASSWORD': 'dbpass',
-        'HOST':'windy.mysql.pythonanywhere-services.com',
-        'PORT':'3306',
+        'ENGINE': 'django.db.backends.mysql',  # or mysql.connector.django
+        'NAME': 'Windy$blog_db',
+        'USER': 'Windy',
+        'PASSWORD': 'mysqlpass',
+        'HOST': 'Windy.mysql.pythonanywhere-services.com',
+        # 'PORT': '3306',
     }
 }
 
