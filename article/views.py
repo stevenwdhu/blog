@@ -62,7 +62,7 @@ class ArticleListView(generic.ListView):
             self.URL_ARGS.update({'search': search})
 
         if order == 'hot':
-            self.ordering = '-total_views'
+            self.ordering = '-views'
             self.URL_ARGS.update({'order': order})
 
         if column_id and column_id.isdigit():
