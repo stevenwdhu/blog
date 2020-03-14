@@ -23,9 +23,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '-uh7jo=^d1f_%-yt5=!5fbtw0$@w8_6vkn7^#s(!6ly^-@g#50'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['windy.pythonanywhere.com']
 
 # APPEND_SLASH = False
 
@@ -164,4 +164,4 @@ CKEDITOR_CONFIGS = {
     }
 }
 
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
