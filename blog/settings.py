@@ -12,22 +12,24 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 
 import os
 import whitenoise
+import json
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+with open(os.path.join(BASE_DIR, 'config.json')) as config_file:
+    config = json.load(config_file)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '-uh7jo=^d1f_%-yt5=!5fbtw0$@w8_6vkn7^#s(!6ly^-@g#50'
+SECRET_KEY = config['SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config.get('DEBUG', False)
 
-ALLOWED_HOSTS = []
-
-# APPEND_SLASH = False
+ALLOWED_HOSTS = ['localhost', '127.0.0.1'] + config.get('ALLOWED_HOSTS')
 
 # Application definition
 
@@ -39,12 +41,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
+    'gunicorn',
+    
     # user apps
     'article',
     'userprofile',
     'comment',
-
+    
     # third-party apps
     'taggit',
     'ckeditor',
@@ -89,12 +92,15 @@ WSGI_APPLICATION = 'blog.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+if config.get('DATABASE'):
+    DATABASES = dict(default=config['DATABASE'])
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        }
     }
-}
 
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
@@ -164,4 +170,4 @@ CKEDITOR_CONFIGS = {
     }
 }
 
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'

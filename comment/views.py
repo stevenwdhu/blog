@@ -39,7 +39,7 @@ class PostComment(CustomFormMixin, generic.edit.ModelFormMixin, generic.FormView
                                      })
             
             new_comment.save()
-            redirect_url = reverse('article:article-detail', args=[self.article_id]) + "#comment_" + new_comment.id
+            redirect_url = reverse('article:article-detail', args=[self.article_id]) + "#comment_" + str(new_comment.id)
             return redirect(redirect_url)
         else:
             return self.form_invalid(form)
@@ -55,16 +55,3 @@ class PostComment(CustomFormMixin, generic.edit.ModelFormMixin, generic.FormView
     
     def get_success_url(self):
         reverse('article:article-detail', args=[self.article_id])
-
-
-def post_comment(request, article_pk):
-    article = get_object_or_404(ArticlePost, pk=article_pk)
-    
-    if request.method == 'POST':
-        comment_form = CommentForm(request.POST)
-        if comment_form.is_valid():
-            new_comment = comment_form.save(commit=False)
-            new_comment.article = article
-            new_comment.user = request.user
-            new_comment.save()
-            return redirect(article)
