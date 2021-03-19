@@ -9,7 +9,7 @@ django-mptt==0.11.0
 django-taggit==1.2.0
 Markdown==3.2.1
 pilkit==2.0
-Pillow==7.0.0
+Pillow==8.1.1
 Pygments==2.6.1
 pytz==2019.3
 six==1.14.0
