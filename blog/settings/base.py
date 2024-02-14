@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'taggit',
     'ckeditor',
     'mptt',
+    'mdeditor',
 ]
 
 MIDDLEWARE = [
@@ -62,8 +63,7 @@ X_FRAME_OPTIONS = 'SAMEORIGIN'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [str(BASE_DIR.joinpath('templates'))]
-        ,
+        'DIRS': [str(BASE_DIR.joinpath('templates'))],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -148,3 +148,12 @@ CKEDITOR_CONFIGS = {
 }
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+
+MDEDITOR_CONFIGS = {
+    'default': {
+        'language': 'en',
+        'watch': True,
+        'lineWrapping': True,
+        'lineNumbers': True
+}}
+

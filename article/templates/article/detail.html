@@ -26,6 +26,44 @@
             transform: translate3d(0, 0, 0);
             will-change: position, transform;
         }
+
+        blockquote {
+            color: #666;
+            padding: 1px 23px;
+            margin: 0 0 22px 0;
+            border-left: 4px solid #cbcbcb;
+            background-color: #f8f8f8
+        }
+
+        blockquote:after {
+            display: block;
+            content: ""
+        }
+
+        blockquote > p {
+            margin: 10px 0
+        }
+
+        blockquote.warning {
+            position: relative;
+            border-left-color: #f75151;
+            margin-left: 8px
+        }
+
+        blockquote.warning:before {
+            position: absolute;
+            top: 14px;
+            left: -12px;
+            background: #f75151;
+            border-radius: 50%;
+            content: "!";
+            width: 20px;
+            height: 20px;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center
+        }
     </style>
 {% endblock style %}
 
@@ -268,6 +306,8 @@
         if (JSON.parse(window.localStorage.getItem('article_liked') || '{}')[{{ article.id }}]) {
             like_btn_red()
         }
+
+        {#$("blockquote").addClass('blockquote')#}
     </script>
 
     <script>

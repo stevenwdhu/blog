@@ -7,6 +7,7 @@ from taggit.managers import TaggableManager
 from imagekit.models import ProcessedImageField
 from imagekit.processors import ResizeToFit
 from ckeditor.fields import RichTextField
+from mdeditor.fields import MDTextField
 
 
 def set_default_column():
@@ -27,7 +28,8 @@ class ArticlePost(models.Model):
     title = models.CharField(max_length=100)
     create_time = models.DateTimeField(default=timezone.now)
     update_time = models.DateTimeField(auto_now=True)
-    body = models.TextField()
+    # body = models.TextField()
+    body = MDTextField()
     views = models.PositiveIntegerField(default=0)
     tag = TaggableManager(blank=True)
     likes = models.PositiveIntegerField(default=0)

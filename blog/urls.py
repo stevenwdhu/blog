@@ -15,9 +15,9 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, re_path, include
-from django.views.static import serve
 from article.views import ArticleListView
 from blog import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     # admin
@@ -27,9 +27,12 @@ urlpatterns = [
     path('article/', include('article.urls')),
     path('user/', include('userprofile.urls')),
     path('comment/', include('comment.urls')),
+    path('mdeditor/', include('mdeditor.urls')),
 
     # main site
     path('', ArticleListView.as_view(), name='article-list'),
-    re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
 
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -20,6 +20,7 @@ from comment.models import Comment
 from comment.forms import CommentForm
 
 import markdown
+from mdeditor.static.mdeditor import js
 
 md = markdown.Markdown(extensions=[
     # 包含 缩写、表格等常用扩展
@@ -36,7 +37,7 @@ class ArticleListView(generic.ListView):
     queryset = ArticlePost.objects.all()
     # context_object_name = 'list'
     template_name = 'article/list.html'
-    paginate_by = 3
+    # paginate_by = 3
     ordering = '-create_time'
     URL_ARGS = {}
     
@@ -69,8 +70,14 @@ class ArticleListView(generic.ListView):
             self.URL_ARGS.update({'tag': tag})
         
         self.extra_context = {'urlarg': self.URL_ARGS, 'search': search}
-        
         return super().get_queryset()
+    
+    def render_to_response(self, context, **response_kwargs):
+        if context.get('is_paginated'):
+            context['list'] = context['page_obj']
+        else:
+            context['list'] = context['object_list']
+        return super().render_to_response(context, **response_kwargs)
 
 
 class ArticleDetailView(generic.DetailView):

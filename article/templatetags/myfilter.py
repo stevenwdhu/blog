@@ -24,7 +24,15 @@ def urlstr(value: dict):
         return urlencode(value)
     else:
         raise TypeError
-    
+
+
+@register.filter
+def poppage(value: dict, arg=None):
+    value = dictpop(value, 'page')
+    if arg:
+        value = dictpop(value, arg)
+    return urlstr(value)
+
 # @register.filter
 # def time_since(value):
 #     now = timezone.now()

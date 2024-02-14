@@ -1,17 +1,18 @@
 import multiprocessing
 import sys
 from pathlib import Path
-from blog.settings import development
 
 BASE_DIR = Path(__file__).parent
 sys.path.append(str(BASE_DIR))
+
+from blog import settings
 
 LOG_DIR = BASE_DIR.joinpath('log')
 
 LOG_DIR.mkdir(mode=0o755, exist_ok=True)
 
 # 绑定的ip与端口
-bind = "0.0.0.0:8000"
+bind = "127.0.0.1:8000"
 
 # 以守护进程的形式后台运行
 daemon = True
@@ -23,8 +24,8 @@ backlog = 512
 timeout = 30
 
 # 调试状态
-debug = development.DEBUG
-reload = development.DEBUG
+debug = settings.DEBUG
+reload = True
 
 # gunicorn要切换到的目的工作目录
 chdir = str(BASE_DIR)
@@ -60,8 +61,8 @@ L          request time in decimal seconds
 p          process ID
 '''
 
-accesslog = str(BASE_DIR.joinpath('gunicorn_access.log'))
-errorlog = str(BASE_DIR.joinpath('gunicorn_error.log'))
-pidfile = str(BASE_DIR.joinpath('gunicorn_error.pid'))
+accesslog = str(LOG_DIR.joinpath('gunicorn_access.log'))
+errorlog = str(LOG_DIR.joinpath('gunicorn_error.log'))
+pidfile = str(LOG_DIR.joinpath('gunicorn_error.pid'))
 
 proc_name = 'django_blog.pid'
