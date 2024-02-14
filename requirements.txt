@@ -11,7 +11,7 @@ django-taggit==1.2.0
 Markdown==3.2.1
 pilkit==2.0
 Pillow==7.0.0
-Pygments==2.6.1
+Pygments==2.15.0
 pytz==2019.3
 six==1.14.0
 sqlparse==0.3.1
